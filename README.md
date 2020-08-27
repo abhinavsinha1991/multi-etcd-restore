@@ -54,9 +54,16 @@ Steps to restore etcd snapshot across a cluster of 3
   systemctl restart etcd
   ```
   
-  #### Note: In case of kubeadm-setup, edit static etcd manifest to:
+  #### Note: In case of kubeadm-setup, edit static etcd manifest to(also, make same chnages for token and data dir params as in etcd.service shown abvoe):
   
   ```
+  .
+  .
+    --data-dir=/var/lib/etcd-restored-3
+    --initial-cluster-token=etcd-restored-3
+  .
+  .
+  .
       volumeMounts:
     - mountPath: /var/lib/etcd-restored
       name: etcd-data
