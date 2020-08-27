@@ -42,11 +42,38 @@ Steps to restore etcd snapshot across a cluster of 3
   
   `ETCDCTL_API=3 etcdctl snapshot restore --cacert=/var/lib/kubernetes/ca.pem --cert=/var/lib/kubernetes/kubernetes.pem --key=/var/lib/kubernetes/kubernetes-key.pem --data-dir=/var/lib/etcd-restored-3 --name=controller-2   --initial-cluster controller-0=https://10.204.14.87:2380,controller-1=https://10.204.14.180:2380,controller-2=https://10.204.14.165:2380 --initial-cluster-token=etcd-restored-3 --initial-advertise-peer-urls=https://10.204.14.165:2380 newsnap.db`
   
-  ### On all 3 controllers, edit etcd.service to point to new token(etcd-restoed-3, in this case), also data directory to /var/lib/etcd-restored-3 in this case
+  ### On all 3 controllers, edit etcd.service to point to new token(etcd-restored-3, in this case), also data directory to /var/lib/etcd-restored-3 in this case
   
   `vi /etc/systemd/system/etcd.service`
-  `systemctl daemon-reload`
-  `systemctl restart etcd`
+  
+    --data-dir=/var/lib/etcd-restored-3
+    --initial-cluster-token=etcd-restored-3
+  
+  ```
+  systemctl daemon-reload
+  systemctl restart etcd
+  ```
+  
+  #### Note: In case of kubeadm-setup, edit static etcd manifest to:
+  
+  ```
+      volumeMounts:
+    - mountPath: /var/lib/etcd-restored
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd-restored
+      type: DirectoryOrCreate
+    name: etcd-data
+  - hostPath:
+      path: /etc/kubernetes/pki/etcd
+      type: DirectoryOrCreate
+    name: etcd-certs
+  ```
   
   ### Verify from any controller
   
